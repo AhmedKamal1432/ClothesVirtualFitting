@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 using namespace cv;
+#define REP(i, n)   for(int i=0;i<(int)(n);++i)
+#define LOOP(i,b,n)   for(int i=(b);i<(int)(n);++i)
 
 /// Global variables
 
@@ -33,7 +35,26 @@ void CannyThreshold(int, void*)
   dst = Scalar::all(0);
 
   src.copyTo( dst, detected_edges);
+  Size s = detected_edges.size();
+  printf("detected_edges height = %d --- width = %d\n lowThreshold = %d\n ",s.height,s.width,lowThreshold);
   imshow( window_name, dst );
+  
+  if(lowThreshold >70 )
+    REP(i,s.height)
+      REP(j,s.width)
+        if(detected_edges.at<int>(i,j) < 0)
+          detected_edges.at<int>(i,j) = 0;
+  
+
+  if(lowThreshold > 99){
+    REP(i,s.height){
+      REP(j,s.width){
+        printf("%d ",detected_edges.at<int>(i,j) );
+      }
+      printf("\n");
+    }
+  }
+
  }
 
 
