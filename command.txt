@@ -1,0 +1,7 @@
+To  compile c++ 
+
+g++ main.cpp -o exc.out `pkg-config opencv --cflags --libs`
+
+to run 
+./exc.out parmeter_1 paramter_2 
+
