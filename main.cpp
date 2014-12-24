@@ -77,17 +77,26 @@ int main(int argc, char** argv)
   main_edge = call_canny(70,main_img);
 
   // resize(teshert ,tmp,tmp.size(),0.40,0.40,INTER_LINEAR);
-  tmp = call_canny(70,teshert);
+  tmp = call_canny(30,teshert);
   resize(tmp ,teshert_edge,teshert_edge.size(),0.35,0.35,INTER_LINEAR);
 
   Size s = main_edge.size();
   printf("hamada \n main_edge ----> height = %d --- width = %d\n",s.height,s.width);
   
-  // imshow("main edged", main_edge);
-  // imshow("Tshirt edged", teshert_edge);
+
+  /// Create Trackbar
+
+  imshow("main edged", main_edge);
+  imshow("Tshirt edged", teshert_edge);
   img = main_edge;
   templ = teshert_edge;
+  /// Create windows
+  namedWindow( image_window, CV_WINDOW_AUTOSIZE );
+  namedWindow( result_window, CV_WINDOW_AUTOSIZE );
+  char* trackbar_label =(char *) "Method: \n 0: SQDIFF \n 1: SQDIFF NORMED \n 2: TM CCORR \n 3: TM CCORR NORMED \n 4: TM COEFF \n 5: TM COEFF NORMED";
+  createTrackbar( trackbar_label, image_window, &match_method, max_Trackbar, MatchingMethod );
   MatchingMethod( 0, 0 );
   waitKey(0);
+  return 0;
 }
 

@@ -3,3 +3,4 @@ include.cpp
 *.o
 *.jpg
 *.png
+*.zip
