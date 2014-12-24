@@ -14,8 +14,8 @@ using namespace std;
 
 Mat main_img , teshert ,main_edge ,teshert_edge ,tmp;
 Mat img; Mat templ; Mat result;
-char* image_window = "Source Image";
-char* result_window = "Result window";
+char* image_window = (char *)"Source Image";
+char* result_window = (char *)"Result window";
 
 int match_method;
 int max_Trackbar = 5;
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
   main_edge = call_canny(70,main_img);
 
   // resize(teshert ,tmp,tmp.size(),0.40,0.40,INTER_LINEAR);
-  tmp = call_canny(30,teshert);
+  tmp = call_canny(70,teshert);
   resize(tmp ,teshert_edge,teshert_edge.size(),0.35,0.35,INTER_LINEAR);
 
   Size s = main_edge.size();
