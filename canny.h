@@ -36,8 +36,7 @@ void CannyThreshold(int, void*)
 
   src.copyTo( dst, detected_edges);
   Size s = detected_edges.size();
-  printf("detected_edges height = %d --- width = %d\n lowThreshold = %d\n ",s.height,s.width,lowThreshold);
-  imshow( window_name, dst );
+  // printf("detected_edges height = %d --- width = %d\n lowThreshold = %d\n ",s.height,s.width,lowThreshold);
   
   if(lowThreshold >70 )
     REP(i,s.height)
@@ -46,26 +45,25 @@ void CannyThreshold(int, void*)
           detected_edges.at<int>(i,j) = 0;
   
 
-  if(lowThreshold > 99){
-    REP(i,s.height){
-      REP(j,s.width){
-        printf("%d ",detected_edges.at<int>(i,j) );
-      }
-      printf("\n");
-    }
-  }
+  // if(lowThreshold > 99){
+  //   REP(i,s.height){
+  //     REP(j,s.width){
+  //       printf("%d ",detected_edges.at<int>(i,j) );
+  //     }
+  //     printf("\n");
+  //   }
+  // }
 
  }
 
 
 /** @function main */
-int main( int argc, char** argv )
+Mat call_canny(int _th , Mat _src )
 {
-  /// Load an image
-  src = imread( argv[1] );
+  src = _src ;
 
   if( !src.data )
-  { return -1; }
+  { return Mat::zeros(0, 0, CV_32F);; }
 
   /// Create a matrix of the same type and size as src (for dst)
   dst.create( src.size(), src.type() );
@@ -77,13 +75,14 @@ int main( int argc, char** argv )
   namedWindow( window_name, CV_WINDOW_AUTOSIZE );
 
   /// Create a Trackbar for user to enter threshold
-  createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
-
+  //createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
+  lowThreshold = _th;
+  
   /// Show the image
   CannyThreshold(0, 0);
 
   /// Wait until user exit program by pressing a key
-  waitKey(0);
+  // waitKey(0);
 
-  return 0;
+  return detected_edges;
 }

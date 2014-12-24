@@ -2,109 +2,92 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include "canny.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
+
 using namespace cv;
 using namespace std;
-// static void help()
-// {
-//     printf(
-//             "\nDemonstrate the use of the HoG descriptor using\n"
-//             "  HOGDescriptor::hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());\n"
-//             "Usage:\n"
-//             "./peopledetect (<image_filename> | <image_list>.txt)\n\n");
-// }
+
+Mat main_img , teshert ,main_edge ,teshert_edge ,tmp;
+Mat img; Mat templ; Mat result;
+char* image_window = "Source Image";
+char* result_window = "Result window";
+
+int match_method;
+int max_Trackbar = 5;
+
+/**
+ * @function MatchingMethod
+ * @brief Trackbar callback
+ */
+void MatchingMethod( int, void* )
+{
+  /// Source image to display
+  Mat img_display;
+  img.copyTo( img_display );
+
+  /// Create the result matrix
+  int result_cols =  img.cols - templ.cols + 1;
+  int result_rows = img.rows - templ.rows + 1;
+
+  result.create( result_cols, result_rows, CV_32FC1 );
+
+  /// Do the Matching and Normalize
+  matchTemplate( img, templ, result, match_method );
+  normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+
+  /// Localizing the best match with minMaxLoc
+  double minVal; double maxVal; Point minLoc; Point maxLoc;
+  Point matchLoc;
+
+  minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+
+  /// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
+  if( match_method  == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED )
+    { matchLoc = minLoc; }
+  else
+    { matchLoc = maxLoc; }
+
+  /// Show me what you got
+  rectangle( img_display, matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
+  rectangle( result, matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
+
+  imshow( image_window, img_display );
+  imshow( result_window, result );
+
+  return;
+}
+
 
 int main(int argc, char** argv)
 {
-  Mat img;
-  FILE* f = 0;
-  char _filename[1024];
+  //argv[1] main image
+  //argv[2] teshert
 
-  if( argc == 1 )
-  {
-      printf("Usage: peopledetect (<image_filename> | <image_list>.txt)\n");
-      return 0;
-  }
-  img = imread(argv[1]);
+  main_img = imread(argv[1],1);
+  teshert = imread(argv[2],1);
 
-  if( img.data )
-  {
-      strcpy(_filename, argv[1]);
-  }
-  else
-  {
-      f = fopen(argv[1], "rt");
-      if(!f)
-      {
-          fprintf( stderr, "ERROR: the specified file could not be loaded\n");
-          return -1;
-      }
-  }
+  if( !main_img.data )
+    { printf("no input");return -1; }
 
-  HOGDescriptor hog;
-  hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
-  namedWindow("people detector", 1);
+  main_edge = call_canny(70,main_img);
 
-  for(;;)
-  {
-      char* filename = _filename;
-      if(f)
-      {
-          if(!fgets(filename, (int)sizeof(_filename)-2, f))
-              break;
-          //while(*filename && isspace(*filename))
-          //  ++filename;
-          if(filename[0] == '#')
-             continue;
-          int l = (int)strlen(filename);
-          while(l > 0 && isspace(filename[l-1]))
-             --l;
-         filename[l] = '\0';
-         img = imread(filename);
-     }
-     printf("%s:\n", filename);
-     if(!img.data)
-         continue;
+  // resize(teshert ,tmp,tmp.size(),0.40,0.40,INTER_LINEAR);
+  tmp = call_canny(30,teshert);
+  resize(tmp ,teshert_edge,teshert_edge.size(),0.35,0.35,INTER_LINEAR);
 
-     fflush(stdout);
-     vector<Rect> found, found_filtered;
-     double t = (double)getTickCount();
-     // run the detector with default parameters. to get a higher hit-rate
-     // (and more false alarms, respectively), decrease the hitThreshold and
-     // groupThreshold (set groupThreshold to 0 to turn off the grouping completely).
-     hog.detectMultiScale(img, found, 0, Size(8,8), Size(32,32), 1.05, 2);
-     t = (double)getTickCount() - t;
-     printf("tdetection time = %gms\n", t*1000./cv::getTickFrequency());
-     size_t i, j;
-      for( i = 0; i < found.size(); i++ )
-     {
-         Rect r = found[i];
-         for( j = 0; j < found.size(); j++ )
-              if( j != i && (r & found[j]) == r)
-                  break;
-         if( j == found.size() )
-             found_filtered.push_back(r);
-     }
-      for( i = 0; i < found_filtered.size(); i++ )
-      {
-         Rect r = found_filtered[i];
-          // the HOG detector returns slightly larger rectangles than the real objects.
-          // so we slightly shrink the rectangles to get a nicer output.
-          r.x += cvRound(r.width*0.1);
-          r.width = cvRound(r.width*0.8);
-         r.y += cvRound(r.height*0.07);
-         r.height = cvRound(r.height*0.8);
-         rectangle(img, r.tl(), r.br(), cv::Scalar(0,255,0), 3);
-     }
-     imshow("people detector", img);
-     int c = waitKey(0) & 255;
-     if( c == 'q' || c == 'Q' || !f)
-         break;
+  Size s = main_edge.size();
+  printf("hamada \n main_edge ----> height = %d --- width = %d\n",s.height,s.width);
+  
+  // imshow("main edged", main_edge);
+  // imshow("Tshirt edged", teshert_edge);
+  img = main_edge;
+  templ = teshert_edge;
+  MatchingMethod( 0, 0 );
+  waitKey(0);
 }
- if(f)
-     fclose(f);
- return 0;
-}
+
