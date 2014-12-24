@@ -2,6 +2,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <stdlib.h>
 #include <stdio.h>
+typedef unsigned char    uchart;
 
 using namespace cv;
 #define REP(i, n)   for(int i=0;i<(int)(n);++i)
@@ -9,8 +10,6 @@ using namespace cv;
 
 /// Global variables
 
-Mat src, src_gray;
-Mat dst, detected_edges;
 
 int edgeThresh = 1;
 int lowThreshold;
@@ -23,8 +22,10 @@ char* window_name = "Edge Map";
  * @function CannyThreshold
  * @brief Trackbar callback - Canny thresholds input with a ratio 1:3
  */
-void CannyThreshold(int, void*)
+Mat CannyThreshold(int, void* , Mat src , Mat src_gray , Mat dst)
 {
+  Mat  detected_edges;
+
   /// Reduce noise with a kernel 3x3
   blur( src_gray, detected_edges, Size(3,3) );
 
@@ -38,11 +39,11 @@ void CannyThreshold(int, void*)
   Size s = detected_edges.size();
   // printf("detected_edges height = %d --- width = %d\n lowThreshold = %d\n ",s.height,s.width,lowThreshold);
   
-  if(lowThreshold >70 )
-    REP(i,s.height)
-      REP(j,s.width)
-        if(detected_edges.at<int>(i,j) < 0)
-          detected_edges.at<int>(i,j) = 0;
+  // if(lowThreshold >70 )
+  //   REP(i,s.height)
+  //     REP(j,s.width)
+  //       if(detected_edges.at<int>(i,j) < 0)
+  //         detected_edges.at<int>(i,j) = 0;
   
 
   // if(lowThreshold > 99){
@@ -54,12 +55,15 @@ void CannyThreshold(int, void*)
   //   }
   // }
 
+  return dst;
  }
 
 
 /** @function main */
 Mat call_canny(int _th , Mat _src )
 {
+  Mat src, src_gray ,dst;
+
   src = _src ;
 
   if( !src.data )
@@ -72,17 +76,39 @@ Mat call_canny(int _th , Mat _src )
   cvtColor( src, src_gray, CV_BGR2GRAY );
 
   /// Create a window
-  namedWindow( window_name, CV_WINDOW_AUTOSIZE );
+  // namedWindow( window_name, CV_WINDOW_AUTOSIZE );
 
   /// Create a Trackbar for user to enter threshold
   //createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
   lowThreshold = _th;
   
   /// Show the image
-  CannyThreshold(0, 0);
+  Mat ret  =   CannyThreshold(0, 0 ,src  , src_gray , dst);
 
   /// Wait until user exit program by pressing a key
   // waitKey(0);
 
-  return detected_edges;
+  return ret;
+}
+
+Mat canny_digtal(Mat im){
+
+Size s = im.size();
+int n = s.height ,  m = s.width;
+
+Mat ans ;
+ans.create(im.size(), im.type() );
+printf("att digital n =  %d  m = %d\n",n,m );
+  LOOP(i,5,n)
+    LOOP(j,5,m){
+       printf(" %d ", j);
+      if(im.at<uchar>(i,j) < 10 ){
+        ans.at<uchar>(i,j) = 0;
+      }
+      else{
+       ans.at<uchar>(i,j) = 255; 
+      }
+    }
+  imshow("digital" , ans);
+  return ans;
 }
