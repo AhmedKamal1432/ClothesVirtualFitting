@@ -1,7 +1,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
 typedef unsigned char    uchart;
 
 using namespace cv;
@@ -64,7 +69,10 @@ Mat call_canny(int _th , Mat _src )
 {
   Mat src, src_gray ,dst;
 
-  src = _src ;
+  src = _src.clone() ;
+  Size s = _src.size();
+  int n = s.width, m=s.height;
+  printf(" n ,m %d %d\n",n,m );
 
   if( !src.data )
   { return Mat::zeros(0, 0, CV_32F);; }
@@ -85,30 +93,14 @@ Mat call_canny(int _th , Mat _src )
   /// Show the image
   Mat ret  =   CannyThreshold(0, 0 ,src  , src_gray , dst);
 
+  Mat im_gray;
+  cvtColor(ret,im_gray,CV_RGB2GRAY);
+  Mat img_bw = im_gray > 40;
+
+
   /// Wait until user exit program by pressing a key
   // waitKey(0);
 
-  return ret;
+  return img_bw;
 }
 
-Mat canny_digtal(Mat im){
-
-Size s = im.size();
-int n = s.height ,  m = s.width;
-
-Mat ans ;
-ans.create(im.size(), im.type() );
-printf("att digital n =  %d  m = %d\n",n,m );
-  LOOP(i,5,n)
-    LOOP(j,5,m){
-       printf(" %d ", j);
-      if(im.at<uchar>(i,j) < 10 ){
-        ans.at<uchar>(i,j) = 0;
-      }
-      else{
-       ans.at<uchar>(i,j) = 255; 
-      }
-    }
-  imshow("digital" , ans);
-  return ans;
-}
