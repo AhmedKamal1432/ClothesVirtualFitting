@@ -1,5 +1,4 @@
 include.cpp
+out.txt
 *.out
 *.o
-*.jpg
-*.png

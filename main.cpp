@@ -1,93 +1,58 @@
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
+#include "flood_fill.h"
+#include "help.h"
+#include "face_detection.h"
+#include "plot_tshirt.h"
 
-#include "canny.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-
-
-using namespace cv;
-using namespace std;
-
-Mat main_img , teshert ,main_edge ,teshert_edge ,tmp;
-Mat img; Mat templ; Mat result;
-char* image_window = "Source Image";
-char* result_window = "Result window";
-
-int match_method;
-int max_Trackbar = 5;
-
-/**
- * @function MatchingMethod
- * @brief Trackbar callback
- */
-void MatchingMethod( int, void* )
-{
-  /// Source image to display
-  Mat img_display;
-  img.copyTo( img_display );
-
-  /// Create the result matrix
-  int result_cols =  img.cols - templ.cols + 1;
-  int result_rows = img.rows - templ.rows + 1;
-
-  result.create( result_cols, result_rows, CV_32FC1 );
-
-  /// Do the Matching and Normalize
-  matchTemplate( img, templ, result, match_method );
-  normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
-
-  /// Localizing the best match with minMaxLoc
-  double minVal; double maxVal; Point minLoc; Point maxLoc;
-  Point matchLoc;
-
-  minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
-
-  /// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
-  if( match_method  == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED )
-    { matchLoc = minLoc; }
-  else
-    { matchLoc = maxLoc; }
-
-  /// Show me what you got
-  rectangle( img_display, matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
-  rectangle( result, matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
-
-  imshow( image_window, img_display );
-  imshow( result_window, result );
-
-  return;
-}
-
+#define shirt_hight_start 50
 
 int main(int argc, char** argv)
 {
+  
   //argv[1] main image
   //argv[2] teshert
 
-  main_img = imread(argv[1],1);
-  teshert = imread(argv[2],1);
+  Mat main_img , src_image , body , shirt;
+  src_image = imread(argv[1]);
+  main_img = resize_body(src_image);
+  body = main_img.clone();
+  imshow("body" , main_img);
 
-  if( !main_img.data )
-    { printf("no input");return -1; }
+  Mat edge = call_canny(80,body);
 
-  main_edge = call_canny(70,main_img);
+  int  mid_width_body = mid_body(edge  , "body mid");
+  // imshow("mid" , mid);
 
-  // resize(teshert ,tmp,tmp.size(),0.40,0.40,INTER_LINEAR);
-  tmp = call_canny(30,teshert);
-  resize(tmp ,teshert_edge,teshert_edge.size(),0.35,0.35,INTER_LINEAR);
+  src_image = imread(argv[2]);
+  main_img = resize_tshirt(src_image);
+  shirt = main_img.clone(); 
+  imshow("shirt" , main_img);
 
-  Size s = main_edge.size();
-  printf("hamada \n main_edge ----> height = %d --- width = %d\n",s.height,s.width);
+  edge = call_canny(80,shirt);
+
+  int mid_width_shirt = mid_body(edge ,"shirt mid");
+  // imshow("shirt mid" , mid);
+  printf("body_width_mid = %d,    Tshirt _width_mid =%d \n", mid_width_body , mid_width_shirt);
+
+  Rect face = call_face_detect(body);
+  printf("x =%d y =%d  w =%d h =%d \n",face.x ,face.y,face.height,face.width );
+  // Point pt1(face.x, face.y); // Display detected faces on main window - live stream from camera
+  // Point pt2((face.x + face.height), (face.y + face.width));
+  // rectangle(body, pt1, pt2, Scalar(0, 255, 0), 2, 8, 0);
+  // imshow ("face", body);
   
-  // imshow("main edged", main_edge);
-  // imshow("Tshirt edged", teshert_edge);
-  img = main_edge;
-  templ = teshert_edge;
-  MatchingMethod( 0, 0 );
+  printf("ggg\n");
+  Mat im_gray;
+  cvtColor(shirt,im_gray,CV_RGB2GRAY);
+
+  imshow("shirt gray" , im_gray);
+  
+  Mat shirt_bw = im_gray > 180;
+  imshow(" shirt binary" , shirt_bw);
+  printf("mid %d %d\n", mid_width_body,mid_width_shirt);
+  int start_heigth_body = face.y+face.height -shirt_hight_start, start_heigth_shirt = shirt_hight_start;
+
+  Mat ans =  plot_tshirt(mid_width_body,mid_width_shirt,start_heigth_body, start_heigth_shirt,body ,shirt, shirt_bw );
+
   waitKey(0);
 }
 

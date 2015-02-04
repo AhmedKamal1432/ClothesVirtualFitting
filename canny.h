@@ -1,7 +1,13 @@
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <iostream>
+
+typedef unsigned char    uchart;
 
 using namespace cv;
 #define REP(i, n)   for(int i=0;i<(int)(n);++i)
@@ -9,8 +15,6 @@ using namespace cv;
 
 /// Global variables
 
-Mat src, src_gray;
-Mat dst, detected_edges;
 
 int edgeThresh = 1;
 int lowThreshold;
@@ -23,8 +27,10 @@ char* window_name = "Edge Map";
  * @function CannyThreshold
  * @brief Trackbar callback - Canny thresholds input with a ratio 1:3
  */
-void CannyThreshold(int, void*)
+Mat CannyThreshold(int, void* , Mat src , Mat src_gray , Mat dst)
 {
+  Mat  detected_edges;
+
   /// Reduce noise with a kernel 3x3
   blur( src_gray, detected_edges, Size(3,3) );
 
@@ -38,11 +44,11 @@ void CannyThreshold(int, void*)
   Size s = detected_edges.size();
   // printf("detected_edges height = %d --- width = %d\n lowThreshold = %d\n ",s.height,s.width,lowThreshold);
   
-  if(lowThreshold >70 )
-    REP(i,s.height)
-      REP(j,s.width)
-        if(detected_edges.at<int>(i,j) < 0)
-          detected_edges.at<int>(i,j) = 0;
+  // if(lowThreshold >70 )
+  //   REP(i,s.height)
+  //     REP(j,s.width)
+  //       if(detected_edges.at<int>(i,j) < 0)
+  //         detected_edges.at<int>(i,j) = 0;
   
 
   // if(lowThreshold > 99){
@@ -54,13 +60,19 @@ void CannyThreshold(int, void*)
   //   }
   // }
 
+  return dst;
  }
 
 
 /** @function main */
 Mat call_canny(int _th , Mat _src )
 {
-  src = _src ;
+  Mat src, src_gray ,dst;
+
+  src = _src.clone() ;
+  Size s = _src.size();
+  int n = s.width, m=s.height;
+  printf(" n ,m %d %d\n",n,m );
 
   if( !src.data )
   { return Mat::zeros(0, 0, CV_32F);; }
@@ -72,17 +84,23 @@ Mat call_canny(int _th , Mat _src )
   cvtColor( src, src_gray, CV_BGR2GRAY );
 
   /// Create a window
-  namedWindow( window_name, CV_WINDOW_AUTOSIZE );
+  // namedWindow( window_name, CV_WINDOW_AUTOSIZE );
 
   /// Create a Trackbar for user to enter threshold
   //createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
   lowThreshold = _th;
   
   /// Show the image
-  CannyThreshold(0, 0);
+  Mat ret  =   CannyThreshold(0, 0 ,src  , src_gray , dst);
+
+  Mat im_gray;
+  cvtColor(ret,im_gray,CV_RGB2GRAY);
+  Mat img_bw = im_gray > 40;
+
 
   /// Wait until user exit program by pressing a key
   // waitKey(0);
 
-  return detected_edges;
+  return img_bw;
 }
+
