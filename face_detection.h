@@ -97,14 +97,14 @@ Rect detectAndDisplay(Mat frame)
         resize(crop, res, Size(128, 128), 0, 0, INTER_LINEAR); // This will be needed later while saving images
         cvtColor(crop, gray, CV_BGR2GRAY); // Convert cropped image to Grayscale
 
-        // Form a filename
-        filename = "";
-        stringstream ssfn;
-        ssfn << filenumber << ".png";
-        filename = ssfn.str();
-        filenumber++;
+        // // Form a filename
+        // filename = "";
+        // stringstream ssfn;
+        // ssfn << filenumber << ".png";
+        // filename = ssfn.str();
+        // filenumber++;
 
-        imwrite(filename, gray);
+        // imwrite(filename, gray);
 
         Point pt1(faces[ic].x, faces[ic].y); // Display detected faces on main window - live stream from camera
         Point pt2((faces[ic].x + faces[ic].height), (faces[ic].y + faces[ic].width));
