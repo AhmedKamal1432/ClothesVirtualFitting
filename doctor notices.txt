@@ -1,3 +1,0 @@
-morphology operator closing to close gaps
-border tracing tracing
-skelelton detection
