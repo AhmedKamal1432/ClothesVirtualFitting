@@ -3,9 +3,9 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <iostream>
 
 typedef unsigned char    uchart;
 

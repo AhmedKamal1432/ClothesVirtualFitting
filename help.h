@@ -2,8 +2,8 @@
 #define BODY_X 670.0
 #define BODY_Y 570.0
 
-#define TSHIRT_X 400.0
-#define TSHIRT_Y 370.0
+#define TSHIRT_X 410.0
+#define TSHIRT_Y 470.0
 
 void print_mat(Mat src){
   Size s = src.size();
