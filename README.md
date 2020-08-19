@@ -1,19 +1,19 @@
 ## Clothes Virtual fitting 
-* This is Image Processing academic project thats help people in shopping .
-* implemented by c++ and openCV
-* using face detection and pixel scanning
+* This is Image Processing academic project that helps people in shopping .
+* Implemented using c++ and openCV
+* Uses face detection and pixel scanning
 
 ## Features
 ### In Release 1
-* fit a T-shirt on your body
+* Fit a T-shirt on your body
 * View your final picture with the new T-shirt 
 
 ###How to use
 * install openCV in your machine (we recommend  linux based OS )
   [use this link](https://github.com/AhmedKamal1432)
-* Clone our Reposatory
-* open your terminal and Change Directory To our folder
-* build the project by this command:
+* Clone our Repository
+* Open your terminal and Change Directory to our folder
+* Build the project by this command:
 
     ``` 
      g++ main.cpp -o exc.out `pkg-config opencv --cflags --libs`
