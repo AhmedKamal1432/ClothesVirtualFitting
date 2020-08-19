@@ -1,5 +1,5 @@
 ## Clothes Virtual fitting 
-* This is Image Processing academic project that helps people in shopping .
+* This is an Image Processing academic project that helps people in shopping.
 * Implemented using c++ and openCV
 * Uses face detection and pixel scanning
 
