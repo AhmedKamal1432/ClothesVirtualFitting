@@ -8,7 +8,7 @@
 * fit a T-shirt on your body
 * View your final picture with the new T-shirt 
 
-###How to use
+### How to use
 * install openCV in your machine (we recommend  linux based OS )
   [use this link](https://github.com/AhmedKamal1432)
 * Clone our Repository
