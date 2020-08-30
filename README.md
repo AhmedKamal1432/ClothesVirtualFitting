@@ -24,7 +24,7 @@
     ./exc.out your_photo.jpg T_shirt_photo.jpg 
    ```
 
-###Sample input
+### Sample input
 
 <img src="https://raw.githubusercontent.com/AhmedKamal1432/ClothesVirtualFitting/master/images/input.jpg" alt="Drawing" style="width: 250px;"/>
 
